@@ -2,6 +2,19 @@
 #
 # This file is part of POX.
 #
+# POX is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# POX is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with POX.  If not, see <http://www.gnu.org/licenses/>.
+
 """
 This component is for use with the OpenFlow tutorial.
 
@@ -12,9 +25,11 @@ It's quite similar to the one for NOX.  Credit where credit due. :)
 """
 
 from pox.core import core
+from pox.lib.util import dpidToStr
 import pox.openflow.libopenflow_01 as of
 from pox.lib.addresses import EthAddr
 from pox.lib.addresses import IPAddr
+from pox.openflow.of_json import *
 
 log = core.getLogger()
 
@@ -32,6 +47,11 @@ class Tutorial (object):
 
     # This binds our PacketIn event listener
     connection.addListeners(self)
+    for con in core.openflow.connections:
+      msg = of.ofp_queue_stats_request()
+      msg.port_no = of.OFPP_ALL
+      msg.queue_id = of.OFPQ_ALL
+      con.send(of.ofp_stats_request(body=msg))
 
     # Use this table to keep track of which ethernet address is on
     # which switch port (keys are MACs, values are ports).
@@ -84,9 +104,6 @@ class Tutorial (object):
     
     dstaddr = EthAddr(packet.dst)
     
-    for con in core.openflow.connections:
-     con.send(of.ofp_stats_request(body=of.ofp_queue_stats()))
-
     #if my_match.dl_dst in mac_to_port:
     if dstaddr in self.mac_to_port:
       # Send packet out the associated port
@@ -147,6 +164,9 @@ def launch ():
 
   def handle_queue_stats (event):
     log.info("inside queue_stats")
-
+    stats = flow_stats_to_list(event.stats)
+    log.debug("QueueStatsReceived from %s: %s", 
+    dpidToStr(event.connection.dpid), stats)
+  
   core.openflow.addListenerByName("ConnectionUp", start_switch)
   core.openflow.addListenerByName("QueueStatsReceived", handle_queue_stats)
