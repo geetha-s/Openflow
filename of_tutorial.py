@@ -382,3 +382,6 @@ def launch ():
   
   core.openflow.addListenerByName("ConnectionUp", start_switch)
   core.openflow.addListenerByName("QueueStatsReceived", handle_queue_stats)
+  core.openflow.addListenerByName("PortStatsReceived", handle_port_stats)
+  #core.openflow.addListenerByName("TableStatsReceived", handle_table_stats)
+  core.openflow.addListenerByName("FlowStatsReceived", handle_flow_stats)
