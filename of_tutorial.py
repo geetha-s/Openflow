@@ -117,7 +117,7 @@ class Tutorial (object):
       msg.match.tp_dst = out_port
 
       for con in core.openflow.connections:
-		msg2 = of.ofp_queue_stats_request()
+	msg2 = of.ofp_queue_stats_request()
         msg2.port_no = out_port
         msg2.queue_id = of.OFPQ_ALL
         con.send(of.ofp_stats_request(body=msg2))
